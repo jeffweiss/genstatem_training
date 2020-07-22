@@ -72,6 +72,11 @@ defmodule Training.DoorLockTest do
 
     assert :unlocked = get_current_state(lock)
 
+    # wait for the finish timeout to fire
+    Process.sleep(2_100)
+
+    assert :unlocked = get_current_state(lock)
+
     eventually(fn ->
       assert :locked = get_current_state(lock)
     end)
@@ -88,5 +93,17 @@ defmodule Training.DoorLockTest do
     end)
 
     assert :unlocked == get_current_state(lock)
+  end
+
+  test "requires start-to-finish input before timeout" do
+    lock = start_supervised!({DoorLock, 1234})
+    GenStateMachine.cast(lock, {:input, 1})
+    GenStateMachine.cast(lock, {:input, 2})
+    GenStateMachine.cast(lock, {:input, 3})
+    Process.sleep(5_000)
+    GenStateMachine.cast(lock, {:input, 4})
+
+    assert :locked == get_current_state(lock)
+    assert %{current_code: []} = get_current_data(lock)
   end
 end
