@@ -39,7 +39,7 @@ defmodule Training.Switch do
   """
   @spec init(any()) :: :gen_statem.init_result(GenStateMachine.state())
   def init(_) do
-    # TODO Start in the off state
+    {:ok, :off, nil}
   end
 
   @doc """
@@ -51,7 +51,7 @@ defmodule Training.Switch do
           GenStateMachine.data()
         ) :: :gen_statem.event_handler_result(GenStateMachine.state())
   def on(:cast, :flip, data) do
-    # TODO Change to the off state
+    {:next_state, :off, data}
   end
 
   def on(_, _, _) do
@@ -67,7 +67,7 @@ defmodule Training.Switch do
           GenStateMachine.data()
         ) :: :gen_statem.event_handler_result(GenStateMachine.state())
   def off(:cast, :flip, data) do
-    # TODO Change to the on state
+    {:next_state, :on, data}
   end
 
   def off(_, _, _) do

@@ -80,8 +80,14 @@ defmodule Training.DoorLock do
   """
   @spec init(any()) :: :gen_statem.init_result(GenStateMachine.state())
   def init([secret_code]) do
-    # TODO set starting state and data
-    {:ok, :todo, %{current_code: [], secret_code: []}}
+    digits =
+      cond do
+        is_integer(secret_code) -> Integer.digits(secret_code)
+        is_list(secret_code) -> secret_code
+        true -> [0, 0, 0, 0]
+      end
+
+    {:ok, :locked, %{current_code: [], secret_code: digits}}
   end
 
   @doc """
@@ -93,7 +99,7 @@ defmodule Training.DoorLock do
           GenStateMachine.data()
         ) :: :gen_statem.event_handler_result(GenStateMachine.state())
   def unlocked(:state_timeout, :lock, data) do
-    # TODO lock when the timeout occurs
+    {:next_state, :locked, %{data | current_code: []}}
   end
 
   def unlocked({:timeout, :finish}, :reset, data) do
@@ -114,7 +120,25 @@ defmodule Training.DoorLock do
           GenStateMachine.data()
         ) :: :gen_statem.event_handler_result(GenStateMachine.state())
   def locked(:cast, {:input, digit}, data) do
-    # TODO add necessary input processing and state transition handling
+    current_sequence = data.current_code ++ [digit]
+
+    cond do
+      current_sequence == data.secret_code ->
+        {:next_state, :unlocked, %{data | current_code: []},
+          [{:state_timeout, @relock_timeout, :lock},
+            # ]}
+             {{:timeout, :finish}, :cancel}]}
+
+      List.starts_with?(data.secret_code, current_sequence) and length(current_sequence) == 1 ->
+        {:keep_state, %{data | current_code: current_sequence},
+          [{{:timeout, :finish}, @finish_timeout, :reset}]}
+
+      List.starts_with?(data.secret_code, current_sequence) ->
+        {:keep_state, %{data | current_code: current_sequence}}
+
+      true ->
+        {:keep_state, %{data | current_code: []}}
+    end
   end
 
   def locked({:timeout, :finish}, :reset, data) do

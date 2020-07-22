@@ -41,7 +41,7 @@ defmodule Training.Turnstile do
   """
   @spec init(any()) :: :gen_statem.init_result(GenStateMachine.state())
   def init(_) do
-    # TODO Start in a locked state
+    {:ok, :locked, 0}
   end
 
   @doc """
@@ -53,11 +53,11 @@ defmodule Training.Turnstile do
           GenStateMachine.data()
         ) :: :gen_statem.event_handler_result(GenStateMachine.state())
   def unlocked(:cast, :push, data) do
-    # TODO move to a locked state
+    {:next_state, :locked, data+1}
   end
 
   def unlocked(_, _, _) do
-    # TODO stay in our current state
+    :keep_state_and_data
   end
 
   @doc """
@@ -69,10 +69,10 @@ defmodule Training.Turnstile do
           GenStateMachine.data()
         ) :: :gen_statem.event_handler_result(GenStateMachine.state())
   def locked(:cast, :coin, data) do
-    # TODO move to an unlocked state
+    {:next_state, :unlocked, data}
   end
 
   def locked(_, _, _) do
-    # TODO stay in our current state
+    :keep_state_and_data
   end
 end
