@@ -7,7 +7,7 @@ defmodule Training.Switch do
 
   @fsm_diagram """
   digraph {
-    rank=LR
+    rankdir=LR
     node [shape=doublecircle]
     off
     node [shape=circle]

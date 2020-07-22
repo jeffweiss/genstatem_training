@@ -7,7 +7,7 @@ defmodule Training.Turnstile do
 
   @fsm_diagram """
   digraph {
-    rank=LR
+    rankdir=LR
     node [shape=doublecircle]
     locked
     node [shape=circle]
