@@ -64,7 +64,7 @@ defmodule Training.DoorLock do
   """
 
   @relock_timeout 5_000
-  @finish_timout 2_000
+  @finish_timeout 2_000
 
   @doc """
   Start a door lock with the specified correct code sequence
